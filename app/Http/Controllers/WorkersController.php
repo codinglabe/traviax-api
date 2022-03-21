@@ -4,16 +4,30 @@ namespace App\Http\Controllers;
 
 use App\Models\Workers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class WorkersController extends Controller
 {
     public function WorkerlogIn(Request $request){
-            
+                $cr = $request->only('email','password');
+                if(Auth::guard('worker')->attempt($cr))
+                {
+                    return Auth::guard('worker')->user();
+                }else
+                {
+                    return "Email or Password not match";
+                }
     }
 
     public function WorkerRegistration(Request $request)
-    {           $worker_check = Workers::where('email',$request->email)->first();
+    {           
+                $request->validate([
+                    "email" => 'required|email',
+                    "name" => 'required',
+                    "address" => 'required',
+                ]);
+                $worker_check = Workers::where('email',$request->email)->first();
                 if(!$worker_check->email == $request->email){
                     $name = $request->first_name." ".$request->name;
                     $worker = new Workers;
